@@ -1,0 +1,77 @@
+1Q) We WIll Need a List of all staff members, including their firstname, lastname, email addresses and the store identification number where they work.
+
+Solution:
+select
+   First_name,
+   Last_name,
+   email,
+   Store_id
+from staff;
+
+Q2) We need seperate count of inventory Items held at each Store
+
+Solution:
+select
+   store_id,
+   count(film_id)
+from Inventory
+   group by store_id;
+
+Q3) We will need active customers for each of your store seperately.
+
+Solution:
+  select
+      store_id,
+      active,
+      Count(Customer_id)
+	from customer
+    where active = 1
+       Group by store_id;
+
+4Q) In order to assess the liability of a data breach, we will need you to provide a count of all customer email address stored in the database.
+
+Solution:
+select distinct count(email) from customer;
+
+
+5Q) We are intrested in how diverse your film offering is as means of understanding how likely you are to keep customers engaged in the future. Please provide a count of unique film titles in inventory at each store and then provide a count of the unique categories of films you provide.
+
+Solution:
+
+select inventory.store_id,
+count(distinct inventory.film_id),
+count( distinct film_category.category_id)
+from inventory inner join film_category on inventory.film_id=film_category.film_id
+group by store_id;
+
+
+6Q) We would like to understand the replacement costs of your films. Please provide the replacemnt ocst of the film that is least expensive to replace, the most expensive to replace the and the average of all films you carry.
+
+Solution:
+select 
+  min(replacement_cost),
+  max(replacement_cost),
+  avg(replacement_cost)
+  from film;
+  
+
+7Q) We are intrested in having you put payment monitoring systems and maximum payment processing restrictions in place in order to minimize the future risk of fraud by your staff. Please provide the average payment that you process, as well as the maximum payment that you have processed.
+
+Solution:
+
+  select
+     Max(amount),
+     Avg(amount)
+from payment;
+
+
+&Q) We would like to better understand what your customer base looks like. Please provide a list of all customer identification values, with a count of rental they have made all-time with your highest volumers at the top of the list.
+
+Solution:
+select
+   customer_id,
+   count(rental_id)
+from rental
+group by customer_id
+order by count(rental_id) desc; 
+
