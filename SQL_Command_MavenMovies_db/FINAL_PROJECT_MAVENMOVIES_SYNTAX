@@ -45,32 +45,98 @@ from film
 3Q) From the same list of films you just pulled, please roll that data up and provide a summary level overview 
 of your inventory. We would like to know how many inventory items you have with each rating at each store. 
 
-Solution:
+Solution:elect
+   film.rating as ratings,
+   Inventory.store_id as store_id,
+   count(Inventory.Inventory_id) as Total_inventories
+from film
+	left join Inventory
+    on film.film_id = inventory.inventory_id
+    group by Store_id, Ratings;
 
-
-
-
-
-
-4. Similarly, we want to understand how diversified the inventory is in terms of replacement cost. We want to 
+4Q) Similarly, we want to understand how diversified the inventory is in terms of replacement cost. We want to 
 see how big of a hit it would be if a certain category of film became unpopular at a certain store.
 We would like to see the number of films, as well as the average replacement cost, and total replacement cost, 
 sliced by store and film category. 
-5.	We want to make sure you folks have a good handle on who your customers are. Please provide a list 
+
+Solution:
+select
+   Inventory.Store_id as store_Id,
+   Category.name as Category_name,
+   avg(film.replacement_cost),
+   sum(film.replacement_cost),
+   Count(inventory.Inventory_id)
+from film
+left join film_category
+on film.film_ID = film_category.film_id
+left join category
+on category.category_id = film_category.category_id
+left join Inventory
+on film_category.film_id = Inventory.film_id
+group by store_id, Category_name;
+
+5Q) We want to make sure you folks have a good handle on who your customers are. Please provide a list 
 of all customer names, which store they go to, whether or not they are currently active, 
 and their full addresses – street address, city, and country. 
-6.	We would like to understand how much your customers are spending with you, and also to know 
+
+Solution:
+select
+   Customer.first_name,
+   customer.last_name,
+   customer.store_id,
+   customer.active,
+   address.address,
+   address.district,
+   city.city,
+   country.country
+from customer
+left join address
+on customer.address_id =  address.address_id
+left join city
+on address.city_id = city.city_id
+left join country
+on city.country_id = country.country_id;
+
+6Q) We would like to understand how much your customers are spending with you, and also to know 
 who your most valuable customers are. Please pull together a list of customer names, their total 
 lifetime rentals, and the sum of all payments you have collected from them. It would be great to 
 see this ordered on total lifetime value, with the most valuable customers at the top of the list. 
 
-7. My partner and I would like to get to know your board of advisors and any current investors.
+Solution:
+select
+   customer.first_name as first_name,
+   customer.last_name as last_name,
+   sum(payment.amount) as amount,
+   count(rental.customer_id)
+from customer
+left join payment
+on customer.customer_id = payment.customer_id
+left join rental
+on payment.customer_id = rental.customer_id
+group by first_name, last_name
+order by amount desc;
+
+7Q) My partner and I would like to get to know your board of advisors and any current investors.
 Could you please provide a list of advisor and investor names in one table? 
 Could you please note whether they are an investor or an advisor, and for the investors, 
 it would be good to include which company they work with. 
+
+Solution:
+select 	distinct concat(advisor.first_name, " ", advisor.last_name) as advisor_name,
+		concat(investor.first_name, " ", investor.last_name) as investor_name, company_name 
+from investor, advisor;
+
+
 8. We're interested in how well you have covered the most-awarded actors. 
 Of all the actors with three types of awards, for what % of them do we carry a film?
 And how about for actors with two types of awards? Same questions. 
 Finally, how about actors with just one award? 
 
-
+Solution:
+with cte1 as (select count(*) as number_of_actors, case when awards="Emmy, Oscar, Tony " then 3
+		when awards in ("Emmy, Oscar", "Emmy, Tony","Oscar, Tony") then 2
+        else 1
+        end as number_of_awards from actor_award
+        group by number_of_awards),
+   cte2 as (select count(*) as total from actor_award)
+   select cte1.number_of_actors/cte2.total as percentage, cte1.number_of_awards from cte1,cte2;
